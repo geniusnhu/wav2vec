@@ -51,8 +51,8 @@ class RawAudioDataset(FairseqDataset):
         if feats.dim() == 2:
             feats = feats.mean(-1)
 
-        if curr_sample_rate != self.sample_rate:
-            raise Exception(f"sample rate: {curr_sample_rate}, need {self.sample_rate}")
+        #if curr_sample_rate != self.sample_rate:
+        #    raise Exception(f"sample rate: {curr_sample_rate}, need {self.sample_rate}")
 
         assert feats.dim() == 1, feats.dim()
 
@@ -172,10 +172,13 @@ class FileAudioDataset(RawAudioDataset):
         logger.info(f"loaded {len(self.fnames)}, skipped {skipped} samples")
 
     def __getitem__(self, index):
-        import soundfile as sf
+        # import soundfile as sf
 
         fname = os.path.join(self.root_dir, self.fnames[index])
-        wav, curr_sample_rate = sf.read(fname)
+        # wav, curr_sample_rate = sf.read(fname)
+        wav = pd.read_csv(fname)
+        curr_sample_rate = 1
+        wav = wav['motion_statistic'].values
         feats = torch.from_numpy(wav).float()
         feats = self.postprocess(feats, curr_sample_rate)
         return {"id": index, "source": feats}
